@@ -40,7 +40,7 @@ class RankRemoveMenu extends CustomForm
 
         $rankName = $ranks[$selectedIndex];
 
-        if ($this->rankFactory->removeRank($rankName)) {
+        if ($this->rankFactory->removeRank($rankName, $player)) {
             $player->sendMessage(TextFormat::GREEN . "Rank '$rankName' has been successfully removed.");
         } else {
             $player->sendMessage(TextFormat::RED . "Failed to remove rank '$rankName'.");

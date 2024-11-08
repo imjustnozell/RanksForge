@@ -16,6 +16,7 @@ use Lyvaris\RankManager\commands\RankEditCommand;
 use Lyvaris\RankManager\commands\RankRemoveCommand;
 use Lyvaris\RankManager\commands\GetRankCommand;
 use Lyvaris\RankManager\commands\AssignRankCommand;
+use Lyvaris\RankManager\commands\CheckTempRankCommand;
 use Lyvaris\RankManager\listeners\PlayerListener;
 use Lyvaris\RankManager\listeners\RankEventListener;
 use Lyvaris\RankManager\listeners\TemporaryListener;
@@ -58,7 +59,7 @@ class Main extends PluginBase
     private function registerCommands(): void
     {
         Server::getInstance()->getCommandMap()->registerAll("rankmanager", [
-            new CheckTemporaryRankCommand(),
+            new CheckTempRankCommand(),
             new SetTemporaryRankCommand(),
             new RankManagementCommand(),
             new RankCreateCommand(),

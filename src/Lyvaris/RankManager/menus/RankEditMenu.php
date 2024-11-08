@@ -54,7 +54,7 @@ class RankEditMenu extends CustomForm
         }
 
         $rankFactory = RankFactory::getInstance();
-        if ($rankFactory->editRank($this->rankName, $prefix, $type, $color, $joinMessage, $permissions, $badge)) {
+        if ($rankFactory->editRank($this->rankName, $prefix, $type, $color, $joinMessage, $permissions, $badge, $player)) {
             $player->sendMessage(TextFormat::GREEN . "Rank '{$this->rankName}' edited successfully!");
         } else {
             $player->sendMessage(TextFormat::RED . "Failed to edit rank. Please try again.");

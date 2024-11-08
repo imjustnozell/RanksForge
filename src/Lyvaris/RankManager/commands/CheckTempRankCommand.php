@@ -8,7 +8,7 @@ use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
 use Lyvaris\RankManager\sessions\SessionManager;
 
-class CheckTemporaryRankCommand extends Command
+class CheckTempRankCommand extends Command
 {
     public function __construct()
     {
