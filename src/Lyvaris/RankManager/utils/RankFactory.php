@@ -2,14 +2,15 @@
 
 namespace Lyvaris\RankManager\utils;
 
+use Lyvaris\RankManager\events\RankAssignedEvent;
 use Nozell\Database\DatabaseFactory;
 use Lyvaris\RankManager\Main;
 use pocketmine\utils\SingletonTrait;
-use Lyvaris\RankManager\events\RankAssignedEvent;
+use Lyvaris\RankManager\events\RankCreateEvent;
 use Lyvaris\RankManager\events\RankEditEvent;
 use Lyvaris\RankManager\events\RankRemoveEvent;
+use Lyvaris\RankManager\sessions\SessionManager;
 use pocketmine\player\Player;
-use RuntimeException;
 
 class RankFactory
 {
@@ -84,15 +85,21 @@ class RankFactory
             return false;
         }
 
-        $rank = new Rank($name, $prefix, $type, $color, $joinMessage, $permissions, $badge);
+        $validTypes = ['staff', 'media', 'vip'];
+        if (!in_array(strtolower($type), $validTypes)) {
+            $creator->sendMessage("§cTipo de rango inválido. Los tipos válidos son: staff, media, vip.");
+            return false;
+        }
+
+        $rank = new Rank($name, $prefix, strtolower($type), $color, $joinMessage, $permissions, $badge);
         $this->ranks[$name] = $rank;
         $this->saveRanks();
 
-        $event = new RankAssignedEvent($creator, $name, null);
+        $event = new RankCreateEvent($rank, $creator);
         $event->call();
 
         if (!$event->isCancelled()) {
-            $creator->sendMessage("§aHas creado y asignado el rango '$name'.");
+            $creator->sendMessage("§aHas creado el rango '$name'.");
         } else {
             unset($this->ranks[$name]);
             $this->saveRanks();
@@ -190,5 +197,30 @@ class RankFactory
     public function getOwningPlugin(): Main
     {
         return Main::getInstance();
+    }
+
+    public function assignRankToPlayer(Player $player, string $rankName, ?int $expiryTime = null): bool
+    {
+        $rank = $this->getRank($rankName);
+        if ($rank === null) {
+            return false;
+        }
+
+        $session = SessionManager::getInstance()->getSession($player);
+        if ($session === null) {
+            return false;
+        }
+
+        $event = new RankAssignedEvent($player, $rankName, $expiryTime);
+        $event->call();
+
+        if ($event->isCancelled()) {
+            $player->sendMessage("§cLa asignación del rango '$rankName' ha sido cancelada.");
+            return false;
+        }
+
+        $session->assignRank($rank, $expiryTime);
+
+        return true;
     }
 }

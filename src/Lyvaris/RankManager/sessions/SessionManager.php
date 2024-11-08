@@ -2,57 +2,60 @@
 
 namespace Lyvaris\RankManager\sessions;
 
-use Lyvaris\RankManager\Main;
-use Nozell\Database\DatabaseFactory;
 use pocketmine\player\Player;
 use pocketmine\utils\SingletonTrait;
-use RuntimeException;
+use Nozell\Database\DatabaseFactory;
+use Lyvaris\RankManager\Main;
 
 class SessionManager
 {
     use SingletonTrait;
 
     private array $sessions = [];
+    private $database;
 
-    public function getSession(Player $player): ?Session
-    {
-        return $this->sessions[$player->getName()] ?? null;
+    protected function __construct() {
+        $this->database = DatabaseFactory::create(
+            Main::getInstance()->getDataFolder() . "sessions.db",
+            "sqlite"
+        );
     }
 
-    public function createSession(Player $player): Session
-    {
-        $playerName = $player->getName();
-
+    public function getSession(Player $player): ?Session {
+        $playerName = strtolower($player->getName());
         if (isset($this->sessions[$playerName])) {
             return $this->sessions[$playerName];
         }
 
-        $databaseType = "sqlite";
-        $databaseFolder = Main::getInstance()->getDataFolder() . "playerdata/";
-        $databasePath = $databaseFolder . "_ranksdata.db";
-
-        @mkdir($databaseFolder, 0755, true);
-
-        $database = DatabaseFactory::create($databasePath, $databaseType, true);
-
-        $session = new Session($playerName, $database);
+        $session = new Session($playerName, $this->database);
         $this->sessions[$playerName] = $session;
+
         return $session;
     }
 
-    public function removeSession(Player $player): void
-    {
-        $playerName = $player->getName();
-        if (isset($this->sessions[$playerName])) {
-            $this->sessions[$playerName]->save();
-            unset($this->sessions[$playerName]);
+    public function loadSession(Player $player): void {
+        $session = $this->getSession($player);
+        if ($session === null) {
+            return;
         }
+
+        $prefix = $session->getPrefix();
+        if ($prefix !== "") {
+        }
+
     }
 
-    public function checkAllTemporaryRanks(): void
-    {
-        foreach ($this->sessions as $session) {
-            $session->checkTemporaryRanks();
+    public function saveSession(Player $player): void {
+        $playerName = strtolower($player->getName());
+        if (!isset($this->sessions[$playerName])) {
+            return;
         }
+
+        $this->sessions[$playerName]->save();
+        unset($this->sessions[$playerName]);
+    }
+
+    public function getAllSessions(): array {
+        return array_values($this->sessions);
     }
 }

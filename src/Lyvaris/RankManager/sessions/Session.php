@@ -2,9 +2,8 @@
 
 namespace Lyvaris\RankManager\sessions;
 
-use RuntimeException;
 use Lyvaris\RankManager\utils\Rank;
-use pocketmine\player\Player;
+use Lyvaris\RankManager\utils\RankFactory;
 use Lyvaris\RankManager\events\TemporaryRankExpireEvent;
 use Lyvaris\RankManager\Main;
 
@@ -27,7 +26,6 @@ class Session
         $this->temporaryRanks = [];
         $this->load();
     }
-
 
     public function getPlayerName(): string
     {
@@ -69,16 +67,6 @@ class Session
         return $this->temporaryRanks;
     }
 
-    public function setTemporaryRank(string $rankName, int $expiryTimestamp): void
-    {
-        $this->temporaryRanks[$rankName] = $expiryTimestamp;
-    }
-
-    public function removeTemporaryRank(string $rankName): void
-    {
-        unset($this->temporaryRanks[$rankName]);
-    }
-
     public function assignRank(Rank $rank, ?int $expiryTime = null): void
     {
         switch ($rank->getType()) {
@@ -100,6 +88,33 @@ class Session
         $this->save();
     }
 
+    public function removeRankByName(string $rankName): void
+    {
+        $rankFactory = RankFactory::getInstance();
+        $rank = $rankFactory->getRank($rankName);
+        if ($rank === null) {
+            return;
+        }
+
+        switch ($rank->getType()) {
+            case 'staff':
+                $this->staffRank = null;
+                break;
+            case 'media':
+                $this->mediaRank = null;
+                break;
+            case 'vip':
+                $this->vipRank = null;
+                break;
+        }
+
+        if (isset($this->temporaryRanks[$rankName])) {
+            unset($this->temporaryRanks[$rankName]);
+        }
+
+        $this->save();
+    }
+
     public function checkTemporaryRanks(): void
     {
         $currentTime = time();
@@ -116,6 +131,7 @@ class Session
                     $event->call();
 
                     if (!$event->isCancelled()) {
+                        $this->removeRankByName($rankName);
 
                         $player->sendMessage("§cTu rango temporal '$rankName' ha expirado.");
                     }
@@ -156,5 +172,36 @@ class Session
         ];
 
         $this->database->set("ranksdata", $this->playerName, $data);
+    }
+
+    public function getPrefix(): string
+    {
+        $rankFactory = RankFactory::getInstance();
+
+        $priority = ['staff', 'media', 'vip'];
+
+        foreach ($priority as $rankType) {
+            $rankName = null;
+            switch ($rankType) {
+                case 'staff':
+                    $rankName = $this->staffRank;
+                    break;
+                case 'media':
+                    $rankName = $this->mediaRank;
+                    break;
+                case 'vip':
+                    $rankName = $this->vipRank;
+                    break;
+            }
+
+            if ($rankName !== null) {
+                $rank = $rankFactory->getRank($rankName);
+                if ($rank !== null) {
+                    return $rank->getPrefix();
+                }
+            }
+        }
+
+        return "";
     }
 }

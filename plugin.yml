@@ -30,5 +30,8 @@ permissions:
   rankmanager.command.settemprank:
     description: "Permite establecer rangos temporales para los jugadores."
     default: op
+  rankmanager.notify:
+    description: "Permite establecer rangos temporales para los jugadores."
+    default: op
 softdepend:
   - PlaceholderAPI

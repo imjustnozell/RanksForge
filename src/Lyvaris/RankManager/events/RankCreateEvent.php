@@ -2,25 +2,35 @@
 
 namespace Lyvaris\RankManager\events;
 
-use pocketmine\event\Event;
 use pocketmine\event\Cancellable;
+use pocketmine\event\Event;
 use Lyvaris\RankManager\utils\Rank;
 use pocketmine\player\Player;
 
-class RankRemoveEvent extends Event implements Cancellable
+class RankCreateEvent extends Event implements Cancellable
 {
-    private Rank $rank;
-    private bool $isCancelled = false;
-    private Player $remover;
+    public const EVENT_NAME = "RankCreateEvent";
 
-    public function __construct(Rank $rank)
+    private Rank $rank;
+
+    private Player $creator;
+
+    private bool $isCancelled = false;
+
+    public function __construct(Rank $rank, Player $creator)
     {
         $this->rank = $rank;
+        $this->creator = $creator;
     }
 
     public function getRank(): Rank
     {
         return $this->rank;
+    }
+
+    public function getCreator(): Player
+    {
+        return $this->creator;
     }
 
     public function isCancelled(): bool
@@ -31,10 +41,5 @@ class RankRemoveEvent extends Event implements Cancellable
     public function setCancelled(bool $cancelled = true): void
     {
         $this->isCancelled = $cancelled;
-    }
-
-    public function getRemover(): Player
-    {
-        return $this->remover;
     }
 }
