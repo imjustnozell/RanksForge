@@ -1,0 +1,34 @@
+name: RanksForge
+version: 1.0.0
+main: Lyvaris\RankManager\Main
+api: [5.0.0]
+description: "Un plugin completo de gestión de rangos para servidores PocketMine-MP."
+authors:
+  - Lyvaris
+permissions:
+  rankmanager.assign:
+    description: "Permite asignar rangos a los jugadores."
+    default: op
+  rankmanager.command.checktemprank:
+    description: "Permite verificar los rangos temporales de los jugadores."
+    default: op
+  rankmanager.command.getrank:
+    description: "Permite obtener el rango de un jugador."
+    default: op
+  rankmanager.command.rankcreate:
+    description: "Permite crear nuevos rangos."
+    default: op
+  rankmanager.command.rankedit:
+    description: "Permite editar rangos existentes."
+    default: op
+  rankmanager.command.rankmanage:
+    description: "Permite gestionar rangos."
+    default: op
+  rankmanager.command.rankremove:
+    description: "Permite eliminar rangos existentes."
+    default: op
+  rankmanager.command.settemprank:
+    description: "Permite establecer rangos temporales para los jugadores."
+    default: op
+softdepend:
+  - PlaceholderAPI

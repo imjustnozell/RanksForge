@@ -4,8 +4,8 @@ namespace Lyvaris\RankManager\placeholders;
 
 use Nozell\PlaceholderAPI\placeholders\PlayerPlaceholder;
 use pocketmine\player\Player;
-use Lyvaris\RankManager\Main;
 use Lyvaris\RankManager\sessions\SessionManager;
+use Lyvaris\RankManager\utils\RankFactory;
 
 class VipRankPlaceholder extends PlayerPlaceholder
 {
@@ -18,6 +18,8 @@ class VipRankPlaceholder extends PlayerPlaceholder
     protected function processPlayer(Player $player): string
     {
         $session = SessionManager::getInstance()->getSession($player);
-        return $session ? ($session->getVipRank() ?? "") : "";
+        $rank = $session->getVipRank();
+        $rank = RankFactory::getInstance()->getRank($rank);
+        return $session ? ($rank->getPrefix() ?? "") : "";
     }
 }

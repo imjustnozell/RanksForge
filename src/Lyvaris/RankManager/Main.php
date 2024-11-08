@@ -15,7 +15,13 @@ use Lyvaris\RankManager\commands\RankCreateCommand;
 use Lyvaris\RankManager\commands\RankEditCommand;
 use Lyvaris\RankManager\commands\RankRemoveCommand;
 use Lyvaris\RankManager\commands\GetRankCommand;
+use Lyvaris\RankManager\commands\AssignRankCommand;
+use Lyvaris\RankManager\listeners\PlayerListener;
+use Lyvaris\RankManager\listeners\RankEventListener;
+use Lyvaris\RankManager\listeners\TemporaryListener;
 use Lyvaris\RankManager\Manager\LangManager;
+use Lyvaris\RankManager\tasks\TemporaryCheckTask;
+use pocketmine\Server;
 use pocketmine\utils\SingletonTrait;
 
 class Main extends PluginBase
@@ -31,8 +37,14 @@ class Main extends PluginBase
         LangManager::setInstance(new LangManager());
         LangManager::getInstance()->loadLangs();
 
-        $this->registerCommands();
+        @mkdir($this->getDataFolder() . "players/", 0755, true);
 
+        $this->getServer()->getPluginManager()->registerEvents(new PlayerListener(), $this);
+        $this->getServer()->getPluginManager()->registerEvents(new RankEventListener(), $this);
+        $this->getServer()->getPluginManager()->registerEvents(new TemporaryListener(), $this);
+        $this->getScheduler()->scheduleRepeatingTask(new TemporaryCheckTask(), 20 * 60);
+
+        $this->registerCommands();
         $this->registerPlaceholders();
 
         $this->getLogger()->info(TextFormat::GREEN . "RankManager plugin enabled!");
@@ -45,20 +57,21 @@ class Main extends PluginBase
 
     private function registerCommands(): void
     {
-        $this->getServer()->getCommandMap()->registerAll("rankmanager", [
+        Server::getInstance()->getCommandMap()->registerAll("rankmanager", [
             new CheckTemporaryRankCommand(),
             new SetTemporaryRankCommand(),
             new RankManagementCommand(),
             new RankCreateCommand(),
             new RankEditCommand(),
             new RankRemoveCommand(),
-            new GetRankCommand()
+            new GetRankCommand(),
+            new AssignRankCommand()
         ]);
     }
 
     private function registerPlaceholders(): void
     {
-        $placeholderAPI = $this->getServer()->getPluginManager()->getPlugin("PlaceholderAPI");
+        $placeholderAPI = Server::getInstance()->getPluginManager()->getPlugin("PlaceholderAPI");
         if ($placeholderAPI !== null && $placeholderAPI->isEnabled()) {
             PlaceholderAPI::getRegistry()->registerPlaceholder(new StaffRankPlaceholder());
             PlaceholderAPI::getRegistry()->registerPlaceholder(new MediaRankPlaceholder());

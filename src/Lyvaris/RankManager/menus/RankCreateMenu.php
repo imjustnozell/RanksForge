@@ -48,7 +48,7 @@ class RankCreateMenu extends CustomForm
         }
 
         $rankFactory = RankFactory::getInstance();
-        if ($rankFactory->createRank($rankName, $prefix, $type, $color, $joinMessage, $permissions, $badge)) {
+        if ($rankFactory->createRank($rankName, $prefix, $type, $color, $joinMessage, $permissions, $badge, $player)) {
             $player->sendMessage(TextFormat::GREEN . "Rank '$rankName' created successfully!");
         } else {
             $player->sendMessage(TextFormat::RED . "Failed to create rank. It may already exist.");

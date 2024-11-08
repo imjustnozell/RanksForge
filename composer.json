@@ -1,6 +1,14 @@
 {
-    "require": {
-        "nozell/formsui": "^1.0",
-        "nozell/database": "^1.0"
+  "name": "lyvaris/ranksforge",
+  "description": "Plugin de gestión de rangos para PocketMine.",
+  "type": "project",
+  "autoload": {
+    "psr-4": {
+      "Lyvaris\\RankManager\\": "src/Lyvaris/RankManager/"
     }
+  },
+  "require": {
+    "nozell/formsui": "^1.0",
+    "nozell/database": "^1.0"
+  }
 }
