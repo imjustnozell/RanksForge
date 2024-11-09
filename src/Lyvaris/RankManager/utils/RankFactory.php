@@ -137,7 +137,7 @@ class RankFactory
             "badge" => $badge
         ]);
 
-        $event = new RankEditEvent($rank, $data["prefix"], $prefix, $data["permissions"], $permissions);
+        $event = new RankEditEvent($rank, $data["prefix"], $prefix, $data["permissions"], $permissions, $editor);
         $event->call();
 
         if ($event->isCancelled()) {
@@ -158,7 +158,7 @@ class RankFactory
 
         $rank = new Rank($name, "", "", "", "", [], "");
 
-        $event = new RankRemoveEvent($rank);
+        $event = new RankRemoveEvent($rank, $remover);
         $event->call();
 
         if ($event->isCancelled()) {

@@ -13,9 +13,10 @@ class RankRemoveEvent extends Event implements Cancellable
     private bool $isCancelled = false;
     private Player $remover;
 
-    public function __construct(Rank $rank)
+    public function __construct(Rank $rank, Player $remover)
     {
         $this->rank = $rank;
+        $this->remover = $remover;
     }
 
     public function getRank(): Rank

@@ -80,7 +80,6 @@ class Session
                 break;
         }
 
-
         if ($expiryTime !== null) {
             $this->temporaryRanks[$rank->getName()] = $expiryTime;
         }
@@ -138,6 +137,14 @@ class Session
         if (!empty($expiredRanks)) {
             $this->save();
         }
+    }
+
+    public function hasRank(string $rankName): bool
+    {
+        return $this->staffRank === $rankName ||
+            $this->mediaRank === $rankName ||
+            $this->vipRank === $rankName ||
+            isset($this->temporaryRanks[$rankName]);
     }
 
     private function load(): void

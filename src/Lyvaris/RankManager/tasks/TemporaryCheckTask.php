@@ -9,9 +9,12 @@ class TemporaryCheckTask extends Task
 {
 
     public function onRun(): void
-    {
-        foreach (SessionManager::getInstance()->getAllSessions() as $player) {
-            SessionManager::getInstance()->getSession($player)->checkTemporaryRanks();
+{
+    foreach (SessionManager::getInstance()->getAllSessions() as $session) {
+        if ($session !== null) {
+            $session->checkTemporaryRanks();
         }
     }
+}
+
 }

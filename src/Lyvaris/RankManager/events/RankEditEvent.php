@@ -22,13 +22,15 @@ class RankEditEvent extends Event implements Cancellable
         string $oldPrefix,
         string $newPrefix,
         array $oldPermissions,
-        array $newPermissions
+        array $newPermissions,
+        Player $editor
     ) {
         $this->rank = $rank;
         $this->oldPrefix = $oldPrefix;
         $this->newPrefix = $newPrefix;
         $this->oldPermissions = $oldPermissions;
         $this->newPermissions = $newPermissions;
+        $this->editor = $editor;
     }
 
     public function getRank(): Rank

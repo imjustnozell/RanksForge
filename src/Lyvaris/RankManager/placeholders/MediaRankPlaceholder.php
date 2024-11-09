@@ -19,6 +19,7 @@ class MediaRankPlaceholder extends PlayerPlaceholder
     {
         $session = SessionManager::getInstance()->getSession($player);
         $rank = $session->getMediaRank();
+        if ($rank === null) return false;
         $rank = RankFactory::getInstance()->getRank($rank);
         return $session ? ($rank->getPrefix() ?? "") : "";
     }

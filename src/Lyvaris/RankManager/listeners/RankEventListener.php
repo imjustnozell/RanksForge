@@ -53,9 +53,6 @@ class RankEventListener implements Listener
             if ($session->hasRank($rank->getName())) {
                 $player = Main::getInstance()->getServer()->getPlayerExact($session->getPlayerName());
                 if ($player !== null) {
-                    $prefix = $session->getPrefix();
-                    if ($prefix !== "") {
-                    }
                     $player->sendMessage("§aTu rango '{$rank->getName()}' ha sido actualizado.");
                 }
             }
