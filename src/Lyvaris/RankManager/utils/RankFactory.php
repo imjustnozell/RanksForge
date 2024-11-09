@@ -16,16 +16,19 @@ class RankFactory
 {
     use SingletonTrait;
 
-    private array $ranks = [];
     private $database;
 
     private function __construct()
     {
+        $dataFolder = Main::getInstance()->getDataFolder();
+        if (!is_dir($dataFolder)) {
+            mkdir($dataFolder, 0777, true);
+        }
+
         $this->database = DatabaseFactory::create(
-            Main::getInstance()->getDataFolder() . "ranks.db",
-            "sqlite"
+            $dataFolder . "ranks.json",
+            "json"
         );
-        $this->loadRanks();
     }
 
     public function loadRanks(): void
@@ -34,7 +37,7 @@ class RankFactory
         foreach ($sections as $rankName) {
             $data = $this->database->get($rankName, "data");
             if ($data !== null) {
-                $this->ranks[$rankName] = new Rank(
+                new Rank(
                     $rankName,
                     $data["prefix"] ?? "",
                     $data["type"] ?? "",
@@ -47,28 +50,22 @@ class RankFactory
         }
     }
 
-    public function saveRanks(): void
-    {
-        foreach ($this->ranks as $rankName => $rank) {
-            $this->database->set($rankName, "data", [
-                "prefix" => $rank->getPrefix(),
-                "type" => $rank->getType(),
-                "color" => $rank->getColor(),
-                "joinMessage" => $rank->getJoinMessage(),
-                "permissions" => $rank->getPermissions(),
-                "badge" => $rank->getBadge()
-            ]);
-        }
-    }
-
-    public function getAllRankNames(): array
-    {
-        return array_keys($this->ranks);
-    }
-
     public function getRank(string $rankName): ?Rank
     {
-        return $this->ranks[$rankName] ?? null;
+        $data = $this->database->get($rankName, "data");
+        if ($data === null) {
+            return null;
+        }
+
+        return new Rank(
+            $rankName,
+            $data["prefix"] ?? "",
+            $data["type"] ?? "",
+            $data["color"] ?? "",
+            $data["joinMessage"] ?? "",
+            $data["permissions"] ?? [],
+            $data["badge"] ?? ""
+        );
     }
 
     public function createRank(
@@ -81,7 +78,7 @@ class RankFactory
         string $badge,
         Player $creator
     ): bool {
-        if (isset($this->ranks[$name])) {
+        if ($this->database->get($name, "data") !== null) {
             return false;
         }
 
@@ -92,21 +89,25 @@ class RankFactory
         }
 
         $rank = new Rank($name, $prefix, strtolower($type), $color, $joinMessage, $permissions, $badge);
-        $this->ranks[$name] = $rank;
-        $this->saveRanks();
+        $this->database->set($name, "data", [
+            "prefix" => $rank->getPrefix(),
+            "type" => $rank->getType(),
+            "color" => $rank->getColor(),
+            "joinMessage" => $rank->getJoinMessage(),
+            "permissions" => $rank->getPermissions(),
+            "badge" => $rank->getBadge()
+        ]);
 
         $event = new RankCreateEvent($rank, $creator);
         $event->call();
 
-        if (!$event->isCancelled()) {
-            $creator->sendMessage("§aHas creado el rango '$name'.");
-        } else {
-            unset($this->ranks[$name]);
-            $this->saveRanks();
+        if ($event->isCancelled()) {
+            $this->database->delete($name, "data");
             $creator->sendMessage("§cLa creación del rango '$name' ha sido cancelada.");
             return false;
         }
 
+        $creator->sendMessage("§aHas creado el rango '$name'.");
         return true;
     }
 
@@ -120,62 +121,42 @@ class RankFactory
         string $badge,
         Player $editor
     ): bool {
-        if (!isset($this->ranks[$name])) {
+        $data = $this->database->get($name, "data");
+        if ($data === null) {
             return false;
         }
 
-        $rank = $this->ranks[$name];
-        $oldData = [
-            "prefix" => $rank->getPrefix(),
-            "type" => $rank->getType(),
-            "color" => $rank->getColor(),
-            "joinMessage" => $rank->getJoinMessage(),
-            "permissions" => $rank->getPermissions(),
-            "badge" => $rank->getBadge()
-        ];
+        $rank = new Rank($name, $prefix, strtolower($type), $color, $joinMessage, $permissions, $badge);
 
-        $rank->setPrefix($prefix);
-        $rank->setType($type);
-        $rank->setColor($color);
-        $rank->setJoinMessage($joinMessage);
-        $rank->setPermissions($permissions);
-        $rank->setBadge($badge);
+        $this->database->set($name, "data", [
+            "prefix" => $prefix,
+            "type" => $type,
+            "color" => $color,
+            "joinMessage" => $joinMessage,
+            "permissions" => $permissions,
+            "badge" => $badge
+        ]);
 
-        $this->saveRanks();
-
-        $event = new RankEditEvent(
-            $rank,
-            $oldData["prefix"],
-            $prefix,
-            $oldData["permissions"],
-            $permissions
-        );
+        $event = new RankEditEvent($rank, $data["prefix"], $prefix, $data["permissions"], $permissions);
         $event->call();
 
-        if (!$event->isCancelled()) {
-            $editor->sendMessage("§aHas editado el rango '$name'.");
-        } else {
-            $rank->setPrefix($oldData["prefix"]);
-            $rank->setType($oldData["type"]);
-            $rank->setColor($oldData["color"]);
-            $rank->setJoinMessage($oldData["joinMessage"]);
-            $rank->setPermissions($oldData["permissions"]);
-            $rank->setBadge($oldData["badge"]);
-            $this->saveRanks();
+        if ($event->isCancelled()) {
+            $this->database->set($name, "data", $data);
             $editor->sendMessage("§cLa edición del rango '$name' ha sido cancelada.");
             return false;
         }
 
+        $editor->sendMessage("§aHas editado el rango '$name'.");
         return true;
     }
 
     public function removeRank(string $name, Player $remover): bool
     {
-        if (!isset($this->ranks[$name])) {
+        if ($this->database->get($name, "data") === null) {
             return false;
         }
 
-        $rank = $this->ranks[$name];
+        $rank = new Rank($name, "", "", "", "", [], "");
 
         $event = new RankRemoveEvent($rank);
         $event->call();
@@ -185,12 +166,8 @@ class RankFactory
             return false;
         }
 
-        unset($this->ranks[$name]);
         $this->database->delete($name, "data");
-        $this->saveRanks();
-
         $remover->sendMessage("§cHas eliminado el rango '$name'.");
-
         return true;
     }
 
@@ -199,28 +176,24 @@ class RankFactory
         return Main::getInstance();
     }
 
-    public function assignRankToPlayer(Player $player, string $rankName, ?int $expiryTime = null): bool
+    public function getAllRankNames(): array
+
     {
-        $rank = $this->getRank($rankName);
-        if ($rank === null) {
-            return false;
+
+        $sections = $this->database->getAllSections();
+
+        $rankNames = [];
+
+        foreach ($sections as $rankName) {
+
+            $data = $this->database->get($rankName, "data");
+
+            if ($data !== null) {
+
+                $rankNames[] = $rankName;
+            }
         }
 
-        $session = SessionManager::getInstance()->getSession($player);
-        if ($session === null) {
-            return false;
-        }
-
-        $event = new RankAssignedEvent($player, $rankName, $expiryTime);
-        $event->call();
-
-        if ($event->isCancelled()) {
-            $player->sendMessage("§cLa asignación del rango '$rankName' ha sido cancelada.");
-            return false;
-        }
-
-        $session->assignRank($rank, $expiryTime);
-
-        return true;
+        return $rankNames;
     }
 }

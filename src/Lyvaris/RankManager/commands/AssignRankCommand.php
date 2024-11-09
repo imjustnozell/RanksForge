@@ -17,6 +17,7 @@ class AssignRankCommand extends Command
     public function __construct()
     {
         parent::__construct("assignrank", "Assign one or more ranks to a player", "/assignrank <player> <rank1,rank2,...>", ["ar"]);
+        $this->setPermission("rankmanager.command.checktemprank");
     }
 
     public function execute(CommandSender $sender, string $label, array $args): void
@@ -44,7 +45,7 @@ class AssignRankCommand extends Command
         $session = $sessionManager->getSession($player);
 
         if ($session === null) {
-            $session = $sessionManager->createSession($player);
+            $session = $sessionManager->loadSession($player);
         }
 
         $rankFactory = RankFactory::getInstance();

@@ -15,14 +15,19 @@ class SessionManager
     private $database;
 
     protected function __construct() {
+        $dataFolder = Main::getInstance()->getDataFolder() . "playerdata/";
+        if (!is_dir($dataFolder)) {
+            mkdir($dataFolder, 0777, true);
+        }
+
         $this->database = DatabaseFactory::create(
-            Main::getInstance()->getDataFolder() . "sessions.db",
-            "sqlite"
+            $dataFolder . "_rankdata.json",
+            "json"
         );
     }
 
     public function getSession(Player $player): ?Session {
-        $playerName = strtolower($player->getName());
+        $playerName = $player->getName();
         if (isset($this->sessions[$playerName])) {
             return $this->sessions[$playerName];
         }
@@ -38,15 +43,10 @@ class SessionManager
         if ($session === null) {
             return;
         }
-
-        $prefix = $session->getPrefix();
-        if ($prefix !== "") {
-        }
-
     }
 
     public function saveSession(Player $player): void {
-        $playerName = strtolower($player->getName());
+        $playerName = $player->getName();
         if (!isset($this->sessions[$playerName])) {
             return;
         }

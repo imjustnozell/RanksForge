@@ -4,7 +4,6 @@ namespace Lyvaris\RankManager\sessions;
 
 use Lyvaris\RankManager\utils\Rank;
 use Lyvaris\RankManager\utils\RankFactory;
-use Lyvaris\RankManager\events\TemporaryRankExpireEvent;
 use Lyvaris\RankManager\Main;
 
 class Session
@@ -81,6 +80,7 @@ class Session
                 break;
         }
 
+
         if ($expiryTime !== null) {
             $this->temporaryRanks[$rank->getName()] = $expiryTime;
         }
@@ -127,14 +127,10 @@ class Session
 
                 $player = Main::getInstance()->getServer()->getPlayerExact($this->playerName);
                 if ($player !== null) {
-                    $event = new TemporaryRankExpireEvent($player, $rankName);
-                    $event->call();
 
-                    if (!$event->isCancelled()) {
-                        $this->removeRankByName($rankName);
+                    $this->removeRankByName($rankName);
 
-                        $player->sendMessage("§cTu rango temporal '$rankName' ha expirado.");
-                    }
+                    $player->sendMessage("§cTu rango temporal '$rankName' ha expirado.");
                 }
             }
         }
@@ -172,36 +168,5 @@ class Session
         ];
 
         $this->database->set("ranksdata", $this->playerName, $data);
-    }
-
-    public function getPrefix(): string
-    {
-        $rankFactory = RankFactory::getInstance();
-
-        $priority = ['staff', 'media', 'vip'];
-
-        foreach ($priority as $rankType) {
-            $rankName = null;
-            switch ($rankType) {
-                case 'staff':
-                    $rankName = $this->staffRank;
-                    break;
-                case 'media':
-                    $rankName = $this->mediaRank;
-                    break;
-                case 'vip':
-                    $rankName = $this->vipRank;
-                    break;
-            }
-
-            if ($rankName !== null) {
-                $rank = $rankFactory->getRank($rankName);
-                if ($rank !== null) {
-                    return $rank->getPrefix();
-                }
-            }
-        }
-
-        return "";
     }
 }

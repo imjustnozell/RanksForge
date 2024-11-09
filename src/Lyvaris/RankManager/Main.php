@@ -35,14 +35,8 @@ class Main extends PluginBase
         self::setInstance($this);
         $this->saveDefaultConfig();
 
-        LangManager::setInstance(new LangManager());
-        LangManager::getInstance()->loadLangs();
-
-        @mkdir($this->getDataFolder() . "players/", 0755, true);
-
         $this->getServer()->getPluginManager()->registerEvents(new PlayerListener(), $this);
         $this->getServer()->getPluginManager()->registerEvents(new RankEventListener(), $this);
-        $this->getServer()->getPluginManager()->registerEvents(new TemporaryListener(), $this);
         $this->getScheduler()->scheduleRepeatingTask(new TemporaryCheckTask(), 20 * 60);
 
         $this->registerCommands();

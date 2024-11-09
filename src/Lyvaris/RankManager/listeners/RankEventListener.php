@@ -34,39 +34,6 @@ class RankEventListener implements Listener
         }
     }
 
-    public function onRankAssigned(RankAssignedEvent $event): void
-    {
-        if ($event->isCancelled()) {
-            return;
-        }
-
-        $player = $event->getPlayer();
-        $rankName = $event->getRankName();
-        $expiryTime = $event->getExpiryTime();
-
-        $rank = RankFactory::getInstance()->getRank($rankName);
-        if ($rank === null) {
-            $player->sendMessage("§cEl rango '$rankName' no existe.");
-            return;
-        }
-
-        $session = SessionManager::getInstance()->getSession($player);
-        if ($session === null) {
-            $player->sendMessage("§cNo se pudo obtener tu sesión.");
-            return;
-        }
-
-        $session->assignRank($rank, $expiryTime);
-
-        $prefix = $session->getPrefix();
-        if ($prefix !== "") {
-        }
-
-        Main::getInstance()->getLogger()->info("El jugador {$player->getName()} ha recibido el rango '$rankName'.");
-
-        $player->sendMessage("§aHas recibido el rango '$rankName'." . ($expiryTime !== null ? " (Expira el " . date("Y-m-d H:i:s", $expiryTime) . ")" : ""));
-    }
-
     public function onRankEdit(RankEditEvent $event): void
     {
         if ($event->isCancelled()) {
@@ -116,9 +83,6 @@ class RankEventListener implements Listener
                 $player = Main::getInstance()->getServer()->getPlayerExact($session->getPlayerName());
                 if ($player !== null) {
                     $session->removeRank($rankName);
-                    $prefix = $session->getPrefix();
-                    if ($prefix !== "") {
-                    }
                     $player->sendMessage("§cEl rango '$rankName' ha sido removido.");
                 }
             }

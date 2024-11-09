@@ -6,6 +6,7 @@ use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\utils\TextFormat;
 use Lyvaris\RankManager\sessions\SessionManager;
+use Lyvaris\RankManager\utils\RankFactory;
 use pocketmine\Server;
 
 class SetTemporaryRankCommand extends Command
@@ -55,11 +56,12 @@ class SetTemporaryRankCommand extends Command
             $sender->sendMessage(TextFormat::RED . "Failed to load session data for '$playerName'.");
             return;
         }
+        $rank = RankFactory::getInstance()->getRank($rankName);
 
         $expiryTime = time() + ($duration * 60);
-        $session->setTemporaryRank($rankName, $expiryTime);
+        $session->assignRank($rank, $expiryTime);
 
-        $sender->sendMessage(TextFormat::GREEN . "Temporary rank '$rankName' set for player '$playerName' for $duration minutes.");
+        $sender->sendMessage(TextFormat::GREEN . "Temporary rank {$rank->getName()} set for player '$playerName' for $duration minutes.");
         $targetPlayer->sendMessage(TextFormat::YELLOW . "You have been given the temporary rank '$rankName' for $duration minutes.");
     }
 }

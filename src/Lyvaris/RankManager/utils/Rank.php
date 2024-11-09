@@ -2,7 +2,8 @@
 
 namespace Lyvaris\RankManager\utils;
 
-class Rank {
+class Rank
+{
     private string $name;
     private string $prefix;
     private string $type;
@@ -30,68 +31,83 @@ class Rank {
     }
 
 
-    public function getName(): string {
+    public function getName(): string
+    {
         return $this->name;
     }
 
-    public function getPrefix(): string {
+    public function getPrefix(): string
+    {
         return $this->prefix;
     }
 
-    public function setPrefix(string $prefix): void {
+    public function setPrefix(string $prefix): void
+    {
         $this->prefix = $prefix;
     }
 
-    public function getType(): string {
+    public function getType(): string
+    {
         return $this->type;
     }
 
-    public function setType(string $type): void {
+    public function setType(string $type): void
+    {
         $this->type = $type;
     }
 
-    public function getColor(): string {
+    public function getColor(): string
+    {
         return $this->color;
     }
 
-    public function setColor(string $color): void {
+    public function setColor(string $color): void
+    {
         $this->color = $color;
     }
 
-    public function getJoinMessage(): string {
+    public function getJoinMessage(): string
+    {
         return $this->joinMessage;
     }
 
-    public function setJoinMessage(string $joinMessage): void {
+    public function setJoinMessage(string $joinMessage): void
+    {
         $this->joinMessage = $joinMessage;
     }
 
-    public function getPermissions(): array {
+    public function getPermissions(): array
+    {
         return $this->permissions;
     }
 
-    public function setPermissions(array $permissions): void {
+    public function setPermissions(array $permissions): void
+    {
         $this->permissions = $permissions;
     }
 
-    public function addPermission(string $permission): void {
+    public function addPermission(string $permission): void
+    {
         if (!in_array($permission, $this->permissions)) {
             $this->permissions[] = $permission;
         }
     }
 
-    public function removePermission(string $permission): void {
+    public function removePermission(string $permission): void
+    {
         $this->permissions = array_filter(
             $this->permissions,
             fn($perm) => $perm !== $permission
         );
     }
 
-    public function getBadge(): string {
+    public function getBadge(): string
+    {
         return $this->badge;
     }
 
-    public function setBadge(string $badge): void {
+    public function setBadge(string $badge): void
+    {
         $this->badge = $badge;
     }
 }
