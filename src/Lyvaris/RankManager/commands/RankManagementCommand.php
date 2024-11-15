@@ -5,9 +5,7 @@ namespace Lyvaris\RankManager\commands;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
-use pocketmine\plugin\PluginOwned;
 use pocketmine\utils\TextFormat;
-use Lyvaris\RankManager\Main;
 use Lyvaris\RankManager\menus\RankManagementMenu;
 
 class RankManagementCommand extends Command

@@ -2,14 +2,12 @@
 
 namespace Lyvaris\RankManager\utils;
 
-use Lyvaris\RankManager\events\RankAssignedEvent;
 use Nozell\Database\DatabaseFactory;
 use Lyvaris\RankManager\Main;
 use pocketmine\utils\SingletonTrait;
 use Lyvaris\RankManager\events\RankCreateEvent;
 use Lyvaris\RankManager\events\RankEditEvent;
 use Lyvaris\RankManager\events\RankRemoveEvent;
-use Lyvaris\RankManager\sessions\SessionManager;
 use pocketmine\player\Player;
 
 class RankFactory
